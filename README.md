@@ -6,7 +6,7 @@
 
 World Tour is a gamified cultural journey designed to break you out of your algorithmic bubble. The mission is simple but epic: consume one piece of culture (Movie or Music) from every single independent country in the world (193 nations).
 
----
+--
 
 🖥️ The Experience
 
