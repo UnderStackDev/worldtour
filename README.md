@@ -6,12 +6,13 @@
 
 World Tour is a gamified cultural journey designed to break you out of your algorithmic bubble. The mission is simple but epic: consume one piece of culture (Movie or Music) from every single independent country in the world (193 nations).
 
---
+---
 
 🖥️ The Experience
 
 Best experienced on a Desktop or Tablet. While the app works on mobile, the interactive map is the heart of the experience. You want to see the world turn from outline to neon-colored as you conquer nations. It's your personal "War Room" for culture.
 
+---
 
 🎮 How to Play
 
@@ -21,6 +22,7 @@ Open index.html (Movies) or music.html (Music) in any modern web browser.
 
 Conquer the world.
 
+---
 
 🏭 The UnderStack Story
 
@@ -30,7 +32,7 @@ I am not a coder. I work in heavy industry. This entire project was created with
 
 From pulp to pixels. 🌲 -> 💻
 
-
+---
 
 🌟 The Philosophy: Experience > Competition
 Most apps want you to compete, grind, and stress about streaks. World Tour is different.
@@ -41,7 +43,7 @@ Gastro Loot: Watching a movie from Spain? Eat some tapas. Drinking a warm beer c
 
 Smart AI Curator: Don't know what to watch from Bhutan? The built-in smart prompt helps you ask your own AI for tailored recommendations based on your progress and ratings.
 
-
+---
 
 📦 Features
 
@@ -55,7 +57,7 @@ Music Edition: For the daily explorer (3min commitment). Includes "Rare Loot" fo
 
 Privacy Focused: Runs 100% in your browser's Local Storage. Your data stays on your device.
 
-
+---
 
 🛠️ Tech Stack
 
@@ -67,7 +69,7 @@ Icons: FontAwesome.
 
 Developer: Gemini AI (via CLI).
 
-
+---
 
 🚀 Roadmap
 
