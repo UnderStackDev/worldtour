@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Tour: Music Beta</title>
+    
+    <!-- Custom Favicon (Embedded SVG) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230f0f0f'/%3E%3Cpath d='M50 15c-15 0-27 12-27 27 0 20 27 43 27 43s27-23 27-43c0-15-12-27-27-27zm0 37c-6 0-10-4-10-10s4-10 10-10 10 4 10 10-4 10-10 10z' fill='%23d946ef'/%3E%3Ctext x='34' y='65' font-family='Arial' font-size='40' fill='%230f0f0f'%3E🎵%3C/text%3E%3C/svg%3E">
+    
+    <!-- PWA Manifest & Meta -->
+    <meta name="theme-color" content="#0f0f0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --card-bg: #1a1a1a;
+            --text-main: #f0f0f0;
+            --text-muted: #888888;
+            --accent: #00e5ff; /* Cyan accent */
+            --main-quest: #d946ef; /* Neon Purple */
+            --gold: #ffd700;
+            --side-quest: #ff7597; /* Pink */
+            --rare-loot: #f39c12; /* Orange for Albums */
+            --danger: #ff5252;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- Modals --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .modal-card {
+            background: linear-gradient(135deg, #1a1a1a, #000000);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid var(--main-quest);
+            max-width: 550px;
+            width: 90%;
+            box-shadow: 0 0 40px rgba(217, 70, 239, 0.2);
+            position: relative;
+        }
+        
+        .info-card {
+            background: var(--card-bg);
+            border-color: var(--accent);
+            text-align: left;
+        }
+
+        .gift-btn {
+            background-color: var(--main-quest);
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 25px;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(217, 70, 239, 0.3);
+        }
+        .gift-btn:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(217, 70, 239, 0.6); }
+
+        /* --- Ko-Fi Widget (Modal Version) --- */
+        .ko-fi-widget {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--rare-loot);
+            border-radius: 50px;
+            padding: 12px 25px;
+            margin-top: 25px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .ko-fi-widget:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.4);
+            background-color: #2a2a2a;
+        }
+        .ko-fi-widget i { color: var(--rare-loot); font-size: 1.2rem; }
+
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        /* --- App Container --- */
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin-top: 20px;
+            padding-bottom: 30px;
+        }
+
+        /* --- Header --- */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            background: rgba(255,255,255,0.03);
+            padding: 15px 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .header-actions { display: flex; gap: 12px; }
+        
+        .icon-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-main);
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            transition: 0.2s;
+        }
+        .icon-btn:hover { background: rgba(217, 70, 239, 0.2); color: var(--main-quest); border-color: var(--main-quest); }
+
+        /* --- Stats --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-box {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .stat-box.main { border-bottom: 4px solid var(--main-quest); }
+        .stat-box.side { border-bottom: 4px solid var(--side-quest); }
+        .stat-box.food { border-bottom: 4px solid var(--rare-loot); }
+
+        .progress-bar-bg {
+            background: #111; height: 14px; border-radius: 7px;
+            margin: 15px 0; overflow: hidden; border: 1px solid #333;
+        }
+        .progress-bar-fill {
+            background: var(--main-quest); height: 100%; width: 0%;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px rgba(217, 70, 239, 0.5);
+        }
+
+        .stat-value-big { font-size: 2.2rem; font-weight: bold; }
+        .stat-icon { font-size: 2rem; opacity: 0.5; }
+
+        /* --- Map --- */
+        .map-wrapper {
+            position: relative;
+            margin-bottom: 30px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #map { height: 480px; width: 100%; z-index: 1; }
+        
+        body.map-fullscreen-active { overflow: hidden; }
+        .map-wrapper.fullscreen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 9999; background: #000; border: none; border-radius: 0;
+        }
+        .map-wrapper.fullscreen #map { height: 100%; }
+        .fs-btn {
+            position: absolute; top: 20px; right: 20px; z-index: 1000;
+            background: rgba(255,255,255,0.95); color: #000;
+            border: none; padding: 10px 15px;
+            border-radius: 10px; cursor: pointer; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* --- Controls & Form --- */
+        .controls { display: flex; gap: 15px; margin-bottom: 25px; }
+        button { padding: 12px 25px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-add { background: var(--main-quest); color: #fff; font-size: 1rem; }
+        .btn-add:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        
+        #add-form {
+            background: var(--card-bg); padding: 30px; border-radius: 20px;
+            margin-bottom: 30px; display: none;
+            border: 1px solid var(--main-quest);
+            animation: slideDown 0.3s ease-out;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        input, select {
+            width: 100%; padding: 14px; margin: 10px 0 25px;
+            border-radius: 10px; border: 1px solid #333;
+            background: #0a0a0a; color: white; box-sizing: border-box;
+            font-size: 1rem;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--main-quest); box-shadow: 0 0 10px rgba(217, 70, 239, 0.2); }
+
+        /* --- Tabs --- */
+        .tab-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.03);
+            padding: 6px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 2px solid transparent;
+            color: var(--text-muted);
+            padding: 10px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tab-btn.active-main {
+            background: rgba(217, 70, 239, 0.15);
+            color: var(--main-quest);
+            border-color: var(--main-quest);
+            box-shadow: 0 0 15px rgba(217, 70, 239, 0.2);
+        }
+
+        .tab-btn.active-side {
+            background: rgba(255, 117, 151, 0.15);
+            color: var(--side-quest);
+            border-color: var(--side-quest);
+            box-shadow: 0 0 15px rgba(255, 117, 151, 0.2);
+        }
+        
+        .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+
+        /* --- Filters --- */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .filter-input, .filter-select {
+            padding: 10px; border-radius: 10px; border: 1px solid #333; background: #0a0a0a; color: var(--text-main); margin: 0 !important;
+        }
+        .filter-input { flex: 2; min-width: 200px; }
+        .filter-select { flex: 1; min-width: 140px; }
+        .filter-input:focus, .filter-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
+        
+        .filter-reset {
+            background: rgba(255,255,255,0.05); border: 1px solid #333; color: var(--text-muted); width: 40px;
+            display: flex; justify-content: center; align-items: center; border-radius: 10px; cursor: pointer; transition: 0.2s;
+        }
+        .filter-reset:hover { background: var(--danger); color: white; border-color: var(--danger); }
+
+        /* --- Lists --- */
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .log-section h3 { border-bottom: 1px solid #222; padding-bottom: 12px; margin-top: 40px; font-size: 1.4rem; }
+        
+        .entry-card {
+            background: var(--card-bg); padding: 18px; margin-bottom: 12px;
+            border-radius: 15px; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(255,255,255,0.03); transition: all 0.2s;
+        }
+        .entry-card:hover { transform: translateX(8px); background: #222; border-color: rgba(255,255,255,0.1); }
+        
+        .entry-meta { font-size: 0.95rem; color: var(--text-muted); margin-top: 6px; }
+        .quest-badge {
+            font-size: 0.7rem; padding: 3px 10px; border-radius: 6px;
+            margin-left: 12px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;
+        }
+        .badge-main { background: rgba(217, 70, 239, 0.15); color: var(--main-quest); }
+        .badge-side { background: rgba(255, 117, 151, 0.15); color: var(--side-quest); }
+        .badge-rare { background: rgba(243, 156, 18, 0.15); color: var(--rare-loot); border: 1px solid rgba(243, 156, 18, 0.3); }
+        
+        .genre-tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(0, 229, 255, 0.1); color: var(--accent);
+            padding: 3px 10px; border-radius: 6px; margin-left: 12px;
+            font-size: 0.85rem; border: 1px solid rgba(0, 229, 255, 0.2);
+        }
+
+        .delete-btn { background: transparent; color: #444; padding: 8px; font-size: 1.6rem; line-height: 1; }
+        .delete-btn:hover { color: var(--danger); }
+
+        /* --- Prompt Box --- */
+        .prompt-box {
+            background: #0a0a0a; padding: 15px; border-radius: 10px;
+            border: 1px dashed var(--text-muted); font-family: monospace; color: var(--accent);
+            margin: 15px 0; cursor: pointer; position: relative; font-size: 0.9rem; line-height: 1.4;
+        }
+        .prompt-box:hover { background: #111; border-color: var(--accent); }
+        .prompt-box::after {
+            content: "Click to Copy"; position: absolute; top: -10px; right: 10px;
+            background: var(--card-bg); padding: 2px 8px; font-size: 0.7rem; color: var(--text-muted);
+        }
+
+        footer { margin-top: 50px; padding: 20px; color: var(--text-muted); font-size: 0.85rem; text-align: center; border-top: 1px solid #222; width: 100%; }
+        #file-input { display: none; }
+
+        /* --- Mobile Optimization --- */
+        @media (max-width: 768px) {
+            .container { width: 94%; margin-top: 15px; }
+            .header-row { flex-direction: column; gap: 20px; text-align: center; padding: 20px 15px; }
+            .header-actions { width: 100%; justify-content: center; gap: 15px; }
+            .icon-btn { width: 50px; height: 50px; font-size: 1.2rem; }
+            #map { height: 350px; }
+            .stat-value-big { font-size: 1.8rem; }
+            .controls { flex-direction: column; }
+            .btn-add { width: 100%; padding: 16px; font-size: 1.1rem; }
+            .tab-nav { gap: 5px; width: 100%; justify-content: space-between; box-sizing: border-box; }
+            .tab-btn { flex: 1; padding: 10px 5px; font-size: 0.9rem; text-align: center; }
+            .filter-bar { padding: 10px; gap: 8px; }
+            .filter-input { width: 100%; flex: 100%; }
+            .filter-select { flex: 1; min-width: 45%; }
+            .filter-reset {
+                width: 100%; padding: 10px; background: rgba(255,50,50,0.1); border-color: var(--danger); color: var(--danger);
+            }
+            .entry-card { flex-direction: column; align-items: flex-start; gap: 10px; position: relative; padding-right: 40px; }
+            .entry-meta { margin-top: 8px; line-height: 1.4; }
+            .delete-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Welcome Modal -->
+    <div id="welcome-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🎵</div>
+            <h1>World Tour Music Beta</h1>
+            <p style="font-size: 1.2rem; color: var(--text-main);">Welcome to the closed beta.</p>
+            <p style="font-style: italic; color: var(--main-quest); font-size: 1.4rem; margin: 15px 0; font-weight: bold;">"Conquer the World through Sound"</p>
+            <p style="line-height: 1.6; color: var(--text-muted);">Listen to a song or artist from every country. Track your progress. Discover global beats.</p>
+            
+            <div style="margin-top: 30px; font-size: 0.95rem; color: var(--text-muted); border-top: 1px solid #222; padding-top: 20px;">
+                <input type="checkbox" id="dont-show-again"> <label for="dont-show-again">Ready to rock, don't show this again</label>
+            </div>
+            <button class="gift-btn" onclick="closeWelcome()">Start Challenge</button>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-card info-card">
+            <span class="close-btn" onclick="toggleInfo()">×</span>
+            <h2 style="color: var(--main-quest); margin-top:0;">ℹ️ Game Rules & Help</h2>
+            <p><b>🛡️ Main Quest:</b> Listen to a song from each of the 193 independent nations.</p>
+            <p><b>💎 Side Quests:</b> Bonus territories like Greenland or Puerto Rico.</p>
+            <p><b>💿 Rare Loot (Albums):</b> If you listen to a full album, mark it as 'Rare Loot'!</p>
+            
+            <hr style="border:0; border-top:1px solid #333; margin: 25px 0;">
+            <h3 style="color: var(--accent)">🤖 Smart AI DJ</h3>
+            <p>Get personalized music recommendations based on your progress.</p>
+            <div id="ai-prompt-text" class="prompt-box" onclick="copyPrompt(this)">Loading smart prompt...</div>
+            <p style="font-size:0.9rem; margin-top:5px; color:#666;">(Click box to copy)</p>
+
+            <hr style="border:0; border-top:1px solid #333; margin: 25px 0;">
+            <h3 style="color: var(--danger)"><i class="fas fa-suitcase-rolling"></i> Avoid "Lost Luggage"!</h3>
+            <p>Your progress is saved in your browser's local storage. However, if you clear your cache, your data will vanish like <i>a fart in the Sahara.</i></p>
+            <p><b>Use the Download button (📥) regularly</b> to keep your "luggage" safe. You can restore it anytime with the Upload button (📤).</p>
+            
+            <div style="text-align: center;">
+                <a href="https://ko-fi.com/understack" target="_blank" class="ko-fi-widget">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span>Buy Dev a Concert Ticket</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header-row">
+            <div>
+                <h2 style="margin:0; letter-spacing: 1px; display: flex; align-items: center; gap: 10px;">
+                    <svg width="32" height="32" viewBox="0 0 100 100" style="vertical-align: middle;"><rect width="100" height="100" rx="20" fill="#1a1a1a"/><path d="M50 15c-15 0-27 12-27 27 0 20 27 43 27 43s27-23 27-43c0-15-12-27-27-27zm0 37c-6 0-10-4-10-10s4-10 10-10 10 4 10 10-4 10-10 10z" fill="#d946ef"/><text x="34" y="65" font-family="Arial" font-size="40" fill="#1a1a1a">🎵</text></svg>
+                    WORLD TOUR 
+                    <span style="font-size:0.7rem; opacity:0.5; vertical-align: middle; margin-left: 10px;">MUSIC BETA EN</span>
+                </h2>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="downloadBackup()" title="Download Backup"><i class="fas fa-download"></i></button>
+                <button class="icon-btn" onclick="triggerRestore()" title="Restore Backup"><i class="fas fa-upload"></i></button>
+                <button class="icon-btn" onclick="toggleInfo()" title="Rules & AI Prompt"><i class="fas fa-info"></i></button>
+                <input type="file" id="file-input" accept=".json" onchange="restoreBackup(this)">
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-box main">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                    <h3 style="margin:0; color:var(--main-quest); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px;">🛡️ Main Quest</h3>
+                    <span id="percent-text" class="stat-value-big" style="color: var(--main-quest)">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div id="progress-fill" class="progress-bar-fill"></div>
+                </div>
+                <div style="color: var(--text-muted); font-size: 0.9rem;">
+                    Conquered: <span id="score-text" style="color:white; font-weight: bold;">0 / 193</span> nations
+                </div>
+            </div>
+            
+            <div class="stat-box side">
+                <h3 style="margin:0; color:var(--side-quest); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px;">💎 Side Quest</h3>
+                <div style="display:flex; align-items:center; margin-top:15px;">
+                    <i class="fas fa-gem stat-icon" style="color: var(--side-quest);"></i>
+                    <div style="margin-left: 20px;">
+                        <span id="side-score" class="stat-value-big">0</span>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Territories</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-box food">
+                <h3 style="margin:0; color:var(--rare-loot); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px;">💿 Rare Loot</h3>
+                <div style="display:flex; align-items:center; margin-top:15px;">
+                    <i class="fas fa-compact-disc stat-icon" style="color: var(--rare-loot);"></i>
+                    <div style="margin-left: 20px;">
+                        <span id="food-score" class="stat-value-big">0</span>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Albums</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div id="map-wrapper" class="map-wrapper">
+            <button class="fs-btn" onclick="toggleFullscreen()" title="Fullscreen"><i class="fas fa-expand"></i> MAP</button>
+            <div id="map"></div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn-add" onclick="prepareAdd()"><i class="fas fa-music"></i> ADD ENTRY</button>
+        </div>
+
+        <!-- Add Form -->
+        <div id="add-form">
+            <input type="hidden" id="inp-id">
+            <h3 id="form-title" style="margin-top:0; color: var(--main-quest)">🎵 New Entry</h3>
+            
+            <label>Artist</label>
+            <input type="text" id="inp-artist" placeholder="e.g. The Hu">
+            
+            <label>Song / Album</label>
+            <input type="text" id="inp-title" placeholder="e.g. Wolf Totem">
+            
+            <label>Country (Auto-detects coords)</label>
+            <input type="text" id="inp-country" placeholder="e.g. Mongolia" oninput="checkCoordinates(this.value)">
+            
+            <label>Genre</label>
+            <select id="inp-genre">
+                <option value="Pop">Pop</option>
+                <option value="Rock / Metal">Rock / Metal</option>
+                <option value="Hip Hop / Rap">Hip Hop / Rap</option>
+                <option value="Folk / Traditional">Folk / Traditional</option>
+                <option value="Electronic / Dance">Electronic / Dance</option>
+                <option value="Classical / Instrumental">Classical / Instrumental</option>
+                <option value="Jazz / Blues">Jazz / Blues</option>
+                <option value="Reggae / Latin">Reggae / Latin</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <div style="margin-bottom: 20px; margin-top: 15px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px;">
+                <input type="checkbox" id="inp-album" style="width: 20px; height: 20px; margin: 0; cursor: pointer;">
+                <label for="inp-album" style="margin: 0; cursor: pointer; color: var(--text-main);">💿 Rare Loot: Listened to full album</label>
+            </div>
+            
+            <label>Continent</label>
+            <select id="inp-continent">
+                <option value="Europe">Europe 🇪🇺</option>
+                <option value="Asia">Asia ⛩️</option>
+                <option value="Africa">Africa 🦁</option>
+                <option value="North America">North America 🗽</option>
+                <option value="South America">South America 🗿</option>
+                <option value="Oceania">Oceania 🦘</option>
+                <option value="Antarctica">Antarctica ❄️</option>
+            </select>
+
+            <label>Coordinates</label>
+            <input type="text" id="inp-coords" placeholder="0.00, 0.00">
+
+            <label>Rating (Quick Pick)</label>
+            <select id="inp-rating">
+                <option value="🏆 Masterpiece">🏆 Masterpiece (Absolute favorite)</option>
+                <option value="🍿 Good Listen">🍿 Good Listen (Enjoyed it)</option>
+                <option value="🤷 Passable">🤷 Passable (It was okay)</option>
+                <option value="🗑️ Noise Pollution">🗑️ Noise Pollution (Avoid)</option>
+            </select>
+
+            <div style="display:flex; gap:15px; margin-top: 20px;">
+                <button id="btn-save" class="btn-add" onclick="saveEntry()">SAVE ENTRY</button>
+                <button style="background:transparent; color:#888; border:1px solid #333" onclick="closeForm()">CANCEL</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tab-nav">
+            <button id="btn-tab-main" class="tab-btn active-main" onclick="openTab('main')">🛡️ Main Quest</button>
+            <button id="btn-tab-side" class="tab-btn" onclick="openTab('side')">💎 Side Quest</button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <input type="text" id="filter-text" class="filter-input" placeholder="🔍 Search artist, country, genre..." oninput="applyFilters()">
+            
+            <select id="filter-continent" class="filter-select" onchange="applyFilters()">
+                <option value="all">🌍 All Continents</option>
+                <option value="Europe">Europe</option>
+                <option value="Asia">Asia</option>
+                <option value="Africa">Africa</option>
+                <option value="North America">North America</option>
+                <option value="South America">South America</option>
+                <option value="Oceania">Oceania</option>
+            </select>
+
+            <select id="filter-rating" class="filter-select" onchange="applyFilters()">
+                <option value="all">⭐ All Ratings</option>
+                <option value="🏆 Masterpiece">🏆 Masterpiece</option>
+                <option value="🍿 Good Listen">🍿 Good Listen</option>
+                <option value="🤷 Passable">🤷 Passable</option>
+                <option value="🗑️ Noise Pollution">🗑️ Noise Pollution</option>
+            </select>
+
+            <select id="filter-sort" class="filter-select" onchange="applyFilters()">
+                <option value="newest">📅 Newest First</option>
+                <option value="oldest">📅 Oldest First</option>
+                <option value="az">🔤 Country (A-Z)</option>
+                <option value="rating">⭐ Best Rated</option>
+            </select>
+
+            <button class="filter-reset" onclick="resetFilters()" title="Reset Filters"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- Lists -->
+        <div id="tab-main" class="log-section tab-content active">
+            <h3 style="color:var(--main-quest)">🛡️ Main Quest Log</h3>
+            <div id="main-quest-list"></div>
+        </div>
+
+        <div id="tab-side" class="log-section tab-content">
+            <h3 style="color:var(--side-quest)">💎 Side Quest Log</h3>
+            <div id="side-quest-list"></div>
+        </div>
+
+        <footer>
+            <div style="margin-bottom: 10px;">
+                <a href="https://github.com/UnderStackDev/worldtour" target="_blank" style="color: var(--text-muted); text-decoration: none; margin: 0 10px;"><i class="fab fa-github"></i> GitHub</a>
+                <a href="mailto:understack_dev@outlook.com" style="color: var(--text-muted); text-decoration: none; margin: 0 10px;"><i class="fas fa-envelope"></i> UnderStack Dev</a>
+            </div>
+            World Tour Music Beta &copy; 2025 • Satu Nieminen • Stay adventurous.
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const coordsDB = {
+            "afghanistan": "33.93, 67.71", "albania": "41.15, 20.16", "algeria": "28.03, 1.66", "andorra": "42.50, 1.52",
+            "angola": "-11.20, 17.87", "antigua and barbuda": "17.06, -61.79", "argentina": "-38.41, -63.61", 
+            "armenia": "40.06, 45.03", "australia": "-25.27, 133.77", "austria": "47.51, 14.55", 
+            "azerbaijan": "40.14, 47.57", "bahamas": "25.03, -77.39", "bahrain": "26.06, 50.55", 
+            "bangladesh": "23.68, 90.35", "barbados": "13.19, -59.54", "belarus": "53.70, 27.95", 
+            "belgium": "50.50, 4.46", "belize": "17.18, -88.49", "benin": "9.30, 2.31", 
+            "bhutan": "27.51, 90.43", "bolivia": "-16.29, -63.58", "bosnia and herzegovina": "43.91, 17.67", 
+            "botswana": "-22.32, 24.68", "brazil": "-14.23, -51.92", "brunei": "4.53, 114.72", 
+            "bulgaria": "42.73, 25.48", "burkina faso": "12.23, -1.56", "burundi": "-3.37, 29.91", 
+            "cabo verde": "16.00, -24.01", "cape verde": "16.00, -24.01", "cambodia": "12.56, 104.99", 
+            "cameroon": "7.36, 12.35", "canada": "56.13, -106.34", "central african republic": "6.61, 20.93", 
+            "chad": "15.45, 18.73", "chile": "-35.67, -71.54", "china": "35.86, 104.19", 
+            "colombia": "4.57, -74.29", "comoros": "-11.87, 43.87", "congo": "-0.22, 15.82", 
+            "republic of the congo": "-0.22, 15.82", "democratic republic of the congo": "-4.03, 21.75", 
+            "dr congo": "-4.03, 21.75", "costa rica": "9.74, -83.75", "croatia": "45.10, 15.20", 
+            "cuba": "21.52, -77.78", "cyprus": "35.12, 33.42", "czechia": "49.81, 15.47", 
+            "czech republic": "49.81, 15.47", "denmark": "56.26, 9.50", "djibouti": "11.82, 42.59", 
+            "dominica": "15.41, -61.37", "dominican republic": "18.73, -70.16", "ecuador": "-1.83, -78.18", 
+            "egypt": "26.82, 30.80", "el salvador": "13.79, -88.89", "equatorial guinea": "1.65, 10.26", 
+            "eritrea": "15.17, 39.78", "estonia": "58.59, 25.01", "eswatini": "-26.52, 31.46", 
+            "swaziland": "-26.52, 31.46", "ethiopia": "9.14, 40.48", "fiji": "-17.71, 178.06", 
+            "finland": "61.92, 25.74", "france": "46.22, 2.21", "gabon": "-0.80, 11.60", 
+            "gambia": "13.44, -15.31", "georgia": "42.31, 43.35", "germany": "51.16, 10.45", 
+            "ghana": "7.94, -1.02", "greece": "39.07, 21.82", "grenada": "12.11, -61.67", 
+            "guatemala": "15.78, -90.23", "guinea": "9.94, -9.69", "guinea-bissau": "11.80, -15.18",
+            "guyana": "4.86, -58.93", "haiti": "18.97, -72.28", "honduras": "15.20, -86.24", 
+            "hungary": "47.16, 19.50", "iceland": "64.96, -19.02", "india": "20.59, 78.96", 
+            "indonesia": "-0.78, 113.92", "iran": "32.42, 53.68", "iraq": "33.22, 43.67", 
+            "ireland": "53.14, -7.69", "israel": "31.04, 34.85", "italy": "41.87, 12.56", 
+            "jamaica": "18.10, -77.29", "japan": "36.20, 138.25", "jordan": "30.58, 36.23", 
+            "kazakhstan": "48.01, 66.92", "kenya": "-0.02, 37.90", "kiribati": "-3.37, -168.73",
+            "north korea": "40.33, 127.51", "south korea": "35.90, 127.76", "kuwait": "29.31, 47.48", 
+            "kyrgyzstan": "41.20, 74.76", "laos": "19.85, 102.49", "latvia": "56.87, 24.60", 
+            "lebanon": "33.85, 35.86", "lesotho": "-29.60, 28.23", "liberia": "6.42, -9.42", 
+            "libya": "26.33, 17.22", "liechtenstein": "47.16, 9.55", "lithuania": "55.16, 23.88", 
+            "luxembourg": "49.81, 6.12", "madagascar": "-18.76, 46.86", "malawi": "-13.25, 34.30", 
+            "malaysia": "4.21, 101.97", "maldives": "3.20, 73.22", "mali": "17.57, -3.99", 
+            "malta": "35.93, 14.37", "marshall islands": "7.13, 171.18", "mauritania": "21.00, -10.94", 
+            "mauritius": "-20.34, 57.55", "mexico": "23.63, -102.55", "micronesia": "7.42, 150.55", 
+            "moldova": "47.41, 28.36", "monaco": "43.73, 7.42", "mongolia": "46.86, 103.84", 
+            "montenegro": "42.70, 19.37", "morocco": "31.79, -7.09", "mozambique": "-18.66, 35.52", 
+            "myanmar": "21.91, 95.95", "burma": "21.91, 95.95", "namibia": "-22.95, 18.49", 
+            "nauru": "-0.52, 166.93", "nepal": "28.39, 84.12", "netherlands": "52.13, 5.29", 
+            "new zealand": "-40.90, 174.88", "nicaragua": "12.86, -85.20", "niger": "17.60, 8.08", 
+            "nigeria": "9.08, 8.67", "north macedonia": "41.60, 21.74", "norway": "60.47, 8.46", 
+            "oman": "21.51, 55.92", "pakistan": "30.37, 69.34", "palau": "7.51, 134.58", 
+            "panama": "8.53, -80.78", "papua new guinea": "-6.31, 143.95", "paraguay": "-23.44, -58.44", 
+            "peru": "-9.19, -75.01", "philippines": "12.87, 121.77", "poland": "51.91, 19.14", 
+            "portugal": "39.39, -8.22", "qatar": "25.35, 51.18", "romania": "45.94, 24.96", 
+            "russia": "61.52, 105.31", "rwanda": "-1.94, 29.87", "saint kitts and nevis": "17.35, -62.78", 
+            "saint lucia": "13.90, -60.97", "saint vincent and the grenadines": "12.98, -61.28", 
+            "samoa": "-13.75, -172.10", "san marino": "43.94, 12.45", "sao tome and principe": "0.18, 6.61", 
+            "saudi arabia": "23.88, 45.07", "senegal": "14.49, -14.45", "serbia": "44.01, 21.00", 
+            "seychelles": "-4.67, 55.49", "sierra leone": "8.46, -11.77", "singapore": "1.35, 103.81", 
+            "slovakia": "48.66, 19.69", "slovenia": "46.15, 14.99", "solomon islands": "-9.64, 160.15", 
+            "somalia": "5.15, 46.19", "south africa": "-30.55, 22.93", "south sudan": "6.87, 31.30", 
+            "spain": "40.46, -3.74", "sri lanka": "7.87, 80.77", "sudan": "12.86, 30.21", 
+            "suriname": "3.91, -56.02", "sweden": "60.12, 18.64", "switzerland": "46.81, 8.22", 
+            "syria": "34.80, 38.99", "tajikistan": "38.86, 71.27", "tanzania": "-6.36, 34.88", 
+            "thailand": "15.87, 100.99", "timor-leste": "-8.87, 125.72", "east timor": "-8.87, 125.72", 
+            "togo": "8.61, 0.82", "tonga": "-21.17, -175.19", "trinidad and tobago": "10.69, -61.22", 
+            "tunisia": "33.88, 9.53", "turkey": "38.96, 35.24", "turkmenistan": "38.96, 59.55", 
+            "tuvalu": "-7.10, 177.64", "uganda": "1.37, 32.29", "ukraine": "48.37, 31.16", 
+            "united arab emirates": "23.42, 53.84", "uae": "23.42, 53.84", 
+            "united kingdom": "55.37, -3.43", "uk": "55.37, -3.43", "great britain": "55.37, -3.43", 
+            "united states": "37.09, -95.71", "usa": "37.09, -95.71", "uruguay": "-32.52, -55.76", 
+            "uzbekistan": "41.37, 64.58", "vanuatu": "-15.37, 166.95", "venezuela": "6.42, -66.58", 
+            "vietnam": "14.05, 108.27", "yemen": "15.55, 48.51", "zambia": "-13.13, 27.84", 
+            "zimbabwe": "-19.01, 29.15"
+        };
+        
+        const sideQuestDB = {
+            "taiwan": "23.69, 120.96", "hong kong": "22.31, 114.16", "macao": "22.19, 113.54", "macau": "22.19, 113.54",
+            "greenland": "71.70, -42.60", "puerto rico": "18.22, -66.59", "palestine": "31.95, 35.23", 
+            "kosovo": "42.60, 20.90", "vatican city": "41.90, 12.45", "holy see": "41.90, 12.45",
+            "åland": "60.17, 19.93", "aland": "60.17, 19.93", "scotland": "56.49, -4.20", 
+            "wales": "52.13, -3.78", "northern ireland": "54.78, -6.49", 
+            "western sahara": "24.21, -12.88", "french guiana": "3.93, -53.12", 
+            "martinique": "14.64, -61.02", "guadeloupe": "16.26, -61.55", 
+            "reunion": "-21.11, 55.53", "french polynesia": "-17.67, -149.40", 
+            "new caledonia": "-20.90, 165.61", "bermuda": "32.30, -64.75", 
+            "cayman islands": "19.31, -81.25", "faroe islands": "61.89, -6.91", 
+            "gibraltar": "36.14, -5.35", "guam": "13.44, 144.79", 
+            "american samoa": "-14.27, -170.13", "antarctica": "-82.86, 135.00", 
+            "aruba": "12.52, -69.96", "curacao": "12.16, -68.99", "sint maarten": "18.04, -63.05"
+        };
+        
+        const continentGoals = { "Europe": 44, "Asia": 47, "Africa": 54, "North America": 23, "South America": 12, "Oceania": 14 };
+
+        // --- APP STATE ---
+        let entries = JSON.parse(localStorage.getItem('worldTourMusicEntriesBetaEN')) || [];
+        let map;
+        let markers = [];
+
+        window.onload = function() {
+            if (!localStorage.getItem('worldTourMusicHideWelcomeEN')) document.getElementById('welcome-modal').style.display = 'flex';
+            initMap();
+            renderEntries();
+            updateStats();
+        };
+
+        // --- UTILS ---
+        function checkCoordinates(val) {
+            if(!val) return;
+            const key = val.toLowerCase().trim();
+            if(coordsDB[key]) document.getElementById('inp-coords').value = coordsDB[key];
+            else if(sideQuestDB[key]) document.getElementById('inp-coords').value = sideQuestDB[key];
+        }
+
+        function closeWelcome() {
+            if(document.getElementById('dont-show-again').checked) localStorage.setItem('worldTourMusicHideWelcomeEN', 'true');
+            document.getElementById('welcome-modal').style.display = 'none';
+        }
+
+        function toggleInfo() {
+            const el = document.getElementById('info-modal');
+            const isOpening = el.style.display === 'none';
+            
+            if (isOpening) {
+                const promptText = getSmartPrompt();
+                const promptBox = document.getElementById('ai-prompt-text');
+                if(promptBox) promptBox.innerText = promptText;
+                el.style.display = 'flex';
+            } else {
+                el.style.display = 'none';
+            }
+        }
+
+        function getSmartPrompt() {
+            const visited = [...new Set(entries.map(e => e.country))].sort().join(', ');
+            
+            // Get recent entries safely
+            const recentEntries = entries.slice(0, 3);
+            const recent = recentEntries.length > 0 
+                ? recentEntries.map(e => `${e.title} - ${e.country} (${e.genre})`).join(' | ') 
+                : 'No reviews yet';
+
+            const counts = getContinentProgress();
+            let leastVisitedContinent = 'Africa'; 
+            let lowestCount = 999;
+            
+            for(const [cont, goal] of Object.entries(continentGoals)) {
+                const count = counts[cont] || 0;
+                if (count < lowestCount && count < goal) { 
+                    lowestCount = count; 
+                    leastVisitedContinent = cont; 
+                }
+            }
+            
+            return `Act as a DJ/Music Curator for my World Tour Challenge.
+📊 My Status:
+- Conquered (DO NOT suggest): ${visited || 'None yet'}.
+- Recently Listened (My Taste): ${recent}.
+- Need to explore continent: ${leastVisitedContinent}.
+
+🎯 Task: Recommend ONE new country not on the list.
+1. 🎵 Musical Culture: Brief summary of the country's sound.
+2. 💿 Recommendations: 3 artists/songs from different genres (e.g., Pop / Folk / Rock) and a short description.
+3. 🎧 Where to listen: Spotify, YouTube, Bandcamp?`;
+        }
+
+        function copyPrompt(el) {
+            navigator.clipboard.writeText(el.innerText);
+            const original = el.innerText;
+            el.innerText = "Copied! ✅";
+            setTimeout(() => el.innerText = original, 2000);
+        }
+
+        function toggleFullscreen() {
+            document.getElementById('map-wrapper').classList.toggle('fullscreen');
+            document.body.classList.toggle('map-fullscreen-active');
+            setTimeout(() => map.invalidateSize(), 300);
+        }
+
+        // --- MAP ---
+        function initMap() {
+            map = L.map('map').setView([20, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+            entries.forEach(addMarkerToMap);
+        }
+
+        function addMarkerToMap(entry) {
+            if(!entry.coords) return;
+            const [lat, lng] = entry.coords.split(',').map(n => parseFloat(n));
+            if(isNaN(lat)) return;
+            const marker = L.marker([lat, lng]).addTo(map);
+            let albumBadge = entry.album ? '<br><b style="color:#f39c12">💿 Album listened</b>' : '';
+            marker.bindPopup(`<b>${entry.country}</b><br>🎵 ${entry.artist ? entry.artist + ' - ' : ''}${entry.title}<br>${entry.genre}${albumBadge}`);
+            markers.push(marker);
+        }
+
+        // --- CORE ---
+        function openTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+            document.getElementById('btn-tab-main').className = 'tab-btn';
+            document.getElementById('btn-tab-side').className = 'tab-btn';
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('btn-tab-' + tab).classList.add(tab === 'main' ? 'active-main' : 'active-side');
+        }
+
+        function toggleForm(show) {
+            const form = document.getElementById('add-form');
+            form.style.display = show ? 'block' : 'none';
+            if(show) window.scrollTo({ top: form.offsetTop - 20, behavior: 'smooth' });
+        }
+        function closeForm() { toggleForm(false); }
+
+        function prepareAdd() {
+            document.getElementById('inp-id').value = '';
+            document.getElementById('inp-artist').value = '';
+            document.getElementById('inp-title').value = '';
+            document.getElementById('inp-country').value = '';
+            document.getElementById('inp-album').checked = false;
+            document.getElementById('inp-rating').value = '🍿 Good Listen';
+            document.getElementById('form-title').innerText = '🎵 New Entry';
+            document.getElementById('btn-save').innerText = 'SAVE ENTRY';
+            toggleForm(true);
+        }
+
+        function editEntry(id) {
+            const e = entries.find(x => x.id === id);
+            if(!e) return;
+            document.getElementById('inp-id').value = e.id;
+            document.getElementById('inp-artist').value = e.artist || ''; // Fallback for old data
+            document.getElementById('inp-title').value = e.title;
+            document.getElementById('inp-country').value = e.country;
+            document.getElementById('inp-genre').value = e.genre || 'Other';
+            document.getElementById('inp-continent').value = e.continent;
+            document.getElementById('inp-album').checked = e.album || false;
+            document.getElementById('inp-coords').value = e.coords;
+            document.getElementById('inp-rating').value = e.rating;
+            document.getElementById('form-title').innerText = '✏️ Edit Entry';
+            document.getElementById('btn-save').innerText = 'UPDATE';
+            toggleForm(true);
+        }
+
+        function saveEntry() {
+            const id = document.getElementById('inp-id').value;
+            const artist = document.getElementById('inp-artist').value;
+            const title = document.getElementById('inp-title').value;
+            const country = document.getElementById('inp-country').value;
+            const genre = document.getElementById('inp-genre').value;
+            const continent = document.getElementById('inp-continent').value;
+            const album = document.getElementById('inp-album').checked;
+            const coords = document.getElementById('inp-coords').value;
+            const rating = document.getElementById('inp-rating').value;
+
+            if(!title || !country || !artist) { alert("Please fill Artist, Title and Country!"); return; }
+            const isMain = coordsDB.hasOwnProperty(country.toLowerCase().trim());
+            const questType = isMain ? 'Main Quest' : 'Side Quest';
+
+            if(id) {
+                const idx = entries.findIndex(x => x.id == id);
+                if(idx !== -1) entries[idx] = { ...entries[idx], artist, title, country, genre, continent, album, coords, rating, questType };
+            } else {
+                entries.unshift({ id: Date.now(), artist, title, country, genre, continent, album, coords, rating, questType, date: new Date().toLocaleDateString('en-GB') });
+            }
+            
+            localStorage.setItem('worldTourMusicEntriesBetaEN', JSON.stringify(entries));
+            
+            // Update UI without reload
+            map.eachLayer(l => { if(l instanceof L.Marker) map.removeLayer(l); });
+            markers = [];
+            entries.forEach(addMarkerToMap);
+            renderEntries();
+            updateStats();
+            closeForm();
+        }
+
+        function deleteEntry(id) {
+            if(confirm('Delete this entry?')) {
+                entries = entries.filter(e => e.id !== id);
+                localStorage.setItem('worldTourMusicEntriesBetaEN', JSON.stringify(entries));
+                
+                // Update UI without reload
+                map.eachLayer(l => { if(l instanceof L.Marker) map.removeLayer(l); });
+                markers = [];
+                entries.forEach(addMarkerToMap);
+                renderEntries();
+                updateStats();
+            }
+        }
+
+        // --- FILTER ---
+        function applyFilters() {
+            const text = document.getElementById('filter-text').value.toLowerCase();
+            const cont = document.getElementById('filter-continent').value;
+            const rate = document.getElementById('filter-rating').value;
+            const sort = document.getElementById('filter-sort').value;
+
+            let res = entries.filter(e => {
+                const matchText = e.title.toLowerCase().includes(text) || 
+                                  (e.artist && e.artist.toLowerCase().includes(text)) || 
+                                  e.country.toLowerCase().includes(text) || 
+                                  (e.genre && e.genre.toLowerCase().includes(text));
+                const matchCont = cont === 'all' || e.continent === cont;
+                const matchRate = rate === 'all' || e.rating === rate;
+                return matchText && matchCont && matchRate;
+            });
+
+            res.sort((a,b) => {
+                if(sort === 'newest') return b.id - a.id;
+                if(sort === 'oldest') return a.id - b.id;
+                if(sort === 'az') return a.country.localeCompare(b.country);
+                if (sort === 'rating') {
+                     const getWeight = r => r.includes('Masterpiece')?4 : r.includes('Good')?3 : r.includes('Passable')?2 : 1;
+                     return getWeight(b.rating) - getWeight(a.rating);
+                }
+            });
+            renderEntries(res);
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-text').value = '';
+            document.getElementById('filter-continent').value = 'all';
+            document.getElementById('filter-rating').value = 'all';
+            document.getElementById('filter-sort').value = 'newest';
+            applyFilters();
+        }
+
+        function renderEntries(data = entries) {
+            const mList = document.getElementById('main-quest-list');
+            const sList = document.getElementById('side-quest-list');
+            mList.innerHTML = ''; sList.innerHTML = '';
+            const counts = getContinentProgress();
+
+            data.forEach(e => {
+                const isMain = e.questType === 'Main Quest';
+                let albumBadge = e.album ? `<span class="genre-tag" style="color:var(--rare-loot); border-color:var(--rare-loot);"><i class="fas fa-compact-disc"></i> Album</span>` : '';
+                let genreBadge = e.genre ? `<span class="genre-tag">${e.genre}</span>` : '';
+                
+                let contBadge = '';
+                if(isMain) {
+                    const goal = continentGoals[e.continent] || 1;
+                    const cur = counts[e.continent] || 0;
+                    const done = cur >= goal;
+                    contBadge = `<span class="quest-badge badge-main" style="${done?'box-shadow:0 0 8px var(--main-quest); border:1px solid var(--main-quest)':''}">${e.continent} (${cur}/${goal})${done?' 🏆':''}</span>`;
+                } else contBadge = `<span class="quest-badge badge-side">${e.continent}</span>`;
+
+                const html = `<div class="entry-card">
+                    <div class="entry-info"><h3 style="margin:0;">${e.country} ${contBadge} ${genreBadge} ${albumBadge}</h3>
+                    <div class="entry-meta">🎵 <b>${e.artist ? e.artist + ' - ' : ''}${e.title}</b> • ${e.rating} • ${e.date}</div></div>
+                    <div style="display:flex; align-items:center;">
+                        <button class="delete-btn" onclick="editEntry(${e.id})" title="Edit"><i class="fas fa-pen"></i></button>
+                        <button class="delete-btn" onclick="deleteEntry(${e.id})" title="Delete">×</button>
+                    </div></div>`;
+                
+                if(isMain) mList.innerHTML += html; else sList.innerHTML += html;
+            });
+        }
+
+        function getContinentProgress() {
+            const c = {};
+            const u = new Set();
+            entries.filter(e => e.questType === 'Main Quest').forEach(e => {
+                if(!u.has(e.country.toLowerCase())) { u.add(e.country.toLowerCase()); c[e.continent] = (c[e.continent]||0)+1; }
+            });
+            return c;
+        }
+
+        function updateStats() {
+            const mainE = entries.filter(e => e.questType === 'Main Quest');
+            const uniqMain = new Set(mainE.map(e => e.country.toLowerCase().trim())).size;
+            const sideE = entries.filter(e => e.questType === 'Side Quest');
+            const uniqSide = new Set(sideE.map(e => e.country.toLowerCase().trim())).size;
+            const albumCount = entries.filter(e => e.album).length;
+            
+            document.getElementById('score-text').innerText = `${uniqMain} / 193`;
+            const pct = Math.round((uniqMain / 193) * 100);
+            document.getElementById('percent-text').innerText = `${pct}%`;
+            document.getElementById('progress-fill').style.width = `${pct}%`;
+            document.getElementById('side-score').innerText = uniqSide;
+            document.getElementById('food-score').innerText = albumCount;
+        }
+        
+        // --- BACKUP ---
+        function downloadBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(entries));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "worldtour_music_beta_backup_" + new Date().toISOString().split('T')[0] + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+        function triggerRestore() { document.getElementById('file-input').click(); }
+        function restoreBackup(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const loaded = JSON.parse(e.target.result);
+                    if (confirm(`Restore ${loaded.length} entries?`)) { 
+                        entries = loaded; 
+                        localStorage.setItem('worldTourMusicEntriesBetaEN', JSON.stringify(entries)); 
+                        location.reload(); 
+                    }
+                } catch (err) { alert("Failed to read file."); }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
