@@ -38,7 +38,7 @@ No Leaderboards: This is your personal travel diary.
 
 Gastro Loot: Watching a movie from Spain? Eat some tapas. Drinking a warm beer counts too. It's about the vibe, not the performance.
 
-Smart AI Curator: Don't know what to watch from Bhutan? The built-in smart prompt helps you ask your own AI for tailored recommendations based on your progress.
+Smart AI Curator: Don't know what to watch from Bhutan? The built-in smart prompt helps you ask your own AI for tailored recommendations based on your progress and ratings.
 
 
 
