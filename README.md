@@ -21,7 +21,7 @@ Open index.html (Movies) or music.html (Music) in any modern web browser.
 Conquer the world.
 
 
-##🏭 The UnderStack Story
+🏭 The UnderStack Story
 
 This project was built in Jämsä, Finland, in the shadow of a paper mill smokestack.
 
@@ -31,7 +31,7 @@ From pulp to pixels. 🌲 -> 💻
 
 
 
-##🌟 The Philosophy: Experience > Competition
+🌟 The Philosophy: Experience > Competition
 Most apps want you to compete, grind, and stress about streaks. World Tour is different.
 
 No Leaderboards: This is your personal travel diary.
@@ -42,7 +42,7 @@ Smart AI Curator: Don't know what to watch from Bhutan? The built-in smart promp
 
 
 
-##📦 Features
+📦 Features
 
 Interactive Map: A massive, zoomable world map that tracks your progress visually.
 
@@ -56,7 +56,7 @@ Privacy Focused: Runs 100% in your browser's Local Storage. Your data stays on y
 
 
 
-##🛠️ Tech Stack
+🛠️ Tech Stack
 
 Core: Single-file HTML/CSS/JS architecture.
 
@@ -68,7 +68,7 @@ Developer: Gemini AI (via CLI).
 
 
 
-¤¤🚀 Roadmap
+🚀 Roadmap
 
 [x] Initial Release (v1.0)
 
