@@ -1,18 +1,18 @@
 ![UnderStack Dev](https://img.shields.io/badge/UnderStack-Dev-black?style=for-the-badge&logo=github) ![License](https://img.shields.io/badge/License-GPLv3-blue?style=for-the-badge) ![Status](https://img.shields.io/badge/Status-Open_Beta-orange?style=for-the-badge)
 
-##🌍 World Tour Challenge 2025
+🌍 World Tour Challenge 2025
 
 "Forget wool socks. This year, I gave my friends the world."
 
 World Tour is a gamified cultural journey designed to break you out of your algorithmic bubble. The mission is simple but epic: consume one piece of culture (Movie or Music) from every single independent country in the world (193 nations).
 
 
-##🖥️ The Experience
+🖥️ The Experience
 
 Best experienced on a Desktop or Tablet. While the app works on mobile, the interactive map is the heart of the experience. You want to see the world turn from outline to neon-colored as you conquer nations. It's your personal "War Room" for culture.
 
 
-##🎮 How to Play
+🎮 How to Play
 
 Download the HTML file (or clone this repo). 
 
