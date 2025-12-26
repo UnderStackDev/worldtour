@@ -38,8 +38,6 @@ No Leaderboards: This is your personal travel diary.
 
 Gastro Loot: Watching a movie from Spain? Eat some tapas. Drinking a warm beer counts too. It's about the vibe, not the performance.
 
-Tier List Ratings: No more agonizing over "3 vs 4 stars". Is it a 🔥 BANGER, 🍿 POPCORN, or 💀 TRASH?
-
 Smart AI Curator: Don't know what to watch from Bhutan? The built-in smart prompt helps you ask your own AI for tailored recommendations based on your progress.
 
 
