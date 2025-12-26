@@ -871,9 +871,19 @@
   🛑 I DISLIKED/AVOID: ${hated || 'N/A'}
 - Target Continent: ${leastVisitedContinent}.
 
-🎯 Task: Recommend ONE movie from ${leastVisitedContinent} that fits my taste.
-If possible, please recommend a movie based on a TRUE STORY or a DOCUMENTARY.
-Include: Title, Country, Year, and brief 'Why I would like it'.`;
+🎯 Task: Recommend THREE distinct options from ${leastVisitedContinent}:
+
+1. The "Safe Bet" 🎯
+   (Matches my taste profile. High production value, accessible.)
+
+2. The "Auteur Choice" 🎨
+   (Artistic, critically acclaimed, or culturally significant.)
+
+3. The "Wildcard" 🃏
+   (A surprise pick. Different genre, cult classic, or unique to the region.)
+
+If possible, prioritize TRUE STORIES or DOCUMENTARIES for at least one pick.
+Include: Title, Country, Year, and brief reasoning for each.`;
         }
 
         function copyPrompt(el) {

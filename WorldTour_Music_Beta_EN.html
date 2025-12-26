@@ -765,12 +765,20 @@
 📊 My Status:
 - Conquered (DO NOT suggest): ${visited || 'None yet'}.
 - Recently Listened (My Taste): ${recent}.
-- Need to explore continent: ${leastVisitedContinent}.
+- Target Continent: ${leastVisitedContinent}.
 
-🎯 Task: Recommend ONE new country not on the list.
-1. 🎵 Musical Culture: Brief summary of the country's sound.
-2. 💿 Recommendations: 3 artists/songs from different genres (e.g., Pop / Folk / Rock) and a short description.
-3. 🎧 Where to listen: Spotify, YouTube, Bandcamp?`;
+🎯 Task: Pick ONE new country from ${leastVisitedContinent} and provide THREE distinct musical paths from different genres:
+
+1. The "Radio Hit" 📻
+   (A popular, catchy song or artist that defines the country's modern mainstream sound.)
+
+2. The "Heritage Choice" 🪕
+   (Traditional, folk, or culturally significant music that captures the country's roots.)
+
+3. The "Modern Wave" 🌊
+   (Indie, underground, or experimental music. Something unique or a hidden gem.)
+
+Include: Artist, Song/Album, Genre, and a very brief reason why I should listen to it.`;
         }
 
         function copyPrompt(el) {
