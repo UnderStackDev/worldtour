@@ -30,7 +30,7 @@ Conquer the world.
 🏭 The UnderStack Story
 
 
-This project was built in Jämsä, Finland, in the shadow of a paper mill smokestack.
+This project was built in Finland, in the shadow of the mill stack.
 
 I am not a coder. I work in heavy industry. This entire project was created with a 0€ budget using a "No-Code" philosophy. Every single line of code was written by Gemini AI, acting as my junior developer, while I served as the architect and prompt engineer.
 
