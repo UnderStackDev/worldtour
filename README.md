@@ -79,4 +79,4 @@ Icons: FontAwesome.
 
 Developer: Gemini AI (via CLI).
 
-
+(Project is in active development. Major updates coming in v1.0.)
