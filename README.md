@@ -79,14 +79,4 @@ Icons: FontAwesome.
 
 Developer: Gemini AI (via CLI).
 
----
 
-🚀 Roadmap
-
-
-
-[x] Initial Release (v1.0)
-
-[ ] Cloud Sync (Cross-device support)
-
-[ ] PWA Support (Mobile App Install)
